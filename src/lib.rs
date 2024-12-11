@@ -12,14 +12,14 @@ pub fn init_from_env() {
   let server = std::env::var("KAFKA_BROKER").expect("Failed to load KAFKA_BROKER");
   let topic = std::env::var("KAFKA_TOPIC_LOG").expect("Failed to load KAFKA_TOPIC_LOG");
   let filter = std::env::var("RUST_LOG")
-    .map(|level| level.parse().unwrap_or(LevelFilter::Off))
-    .unwrap_or(LevelFilter::Off);
+    .map(|level| level.parse().unwrap_or(LevelFilter::Info))
+    .unwrap_or(LevelFilter::Info);
 
   init(&server, filter, &topic);
 }
 
 /// Init the kafka logger
-/// 
+///
 /// # Examples
 /// ```
 /// kafka_logger::init("localhost:9093", log::LevelFilter::Debug, "logging");
@@ -106,5 +106,19 @@ impl Log for Logger {
           .key(&()),
       );
     }
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use crate::{init_from_env, shutdown};
+
+  #[test]
+  fn test_env_init() {
+    std::env::set_var("KAFKA_BROKER", "localhost");
+    std::env::set_var("KAFKA_TOPIC_LOG", "logging");
+
+    init_from_env();
+    shutdown();
   }
 }
