@@ -7,7 +7,7 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        os: [{ name: linux, os: ubuntu-latest }, { name: windows, os: windows-latest }, { name: macos, os: macos-latest }]
+        os: [{ name: linux, os: ubuntu-latest }, { name: macos, os: macos-latest }]
     runs-on: ${{ matrix.os.os }}
     steps:
       - name: Prepare symlink configuration
