@@ -2,6 +2,13 @@
 name = "kafka-logger"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A simple logger for sending logs to kafka"
+repository = "https://github.com/Profiidev/kafka-logger"
+categories = ["Debugging"]
+exclude = [".github/", "Cargo.lock", "nextest.toml", "CHANGELOG.md", "cliff.toml", "release-plz.toml", "rustfmt.toml"]
+keywords = ["log", "logger", "logging", "kafka"]
+readme = "README.md"
 
 [dependencies]
 log = { version = "0.4.22", features = ["std"] }
