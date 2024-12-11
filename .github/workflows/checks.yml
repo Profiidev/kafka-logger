@@ -1,0 +1,87 @@
+name: Checks and Validation
+on:
+  pull_request:
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    strategy:
+      matrix:
+        os: [{ name: linux, os: ubuntu-latest }, { name: windows, os: windows-latest }, { name: macos, os: macos-latest }]
+    runs-on: ${{ matrix.os.os }}
+    steps:
+      - name: Prepare symlink configuration
+        if: ${{ matrix.os.name == 'windows' }}
+        run: git config --global core.symlinks true
+
+      - run: choco install ninja
+        if: ${{ matrix.os.name == 'windows' }}
+
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo and rust files
+        id: rust_cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: "build_and_test_${{ matrix.os.name }}"
+
+      - uses: taiki-e/install-action@nextest
+      - name: "Build and test"
+        run: cargo nextest run --workspace --all-features --profile ${{ matrix.os.name }}
+
+      - name: Upload Test Result File
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os.name }}
+          path: ${{ github.workspace }}/target/nextest/${{ matrix.os.name }}/junit-${{ matrix.os.name }}.xml
+          retention-days: 5
+
+  comment_results:
+    permissions:
+      checks: write
+      pull-requests: write
+    name: Comment Results to PR
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_test
+    steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+          path: test-results
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/*.xml
+
+  linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.RELEASE_PLZ_TOKEN }}
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo and rust files
+        id: rust_cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: "build_and_test_linux"
+
+      - name: Run linters
+        uses: profiidev/rust-lint-action@v2
+        with:
+          rustfmt: true
+          clippy: true
+          auto_fix: true
