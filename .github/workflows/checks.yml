@@ -80,7 +80,7 @@ jobs:
           shared-key: "build_and_test_linux"
 
       - name: Run linters
-        uses: profiidev/rust-lint-action@v2
+        uses: profiidev/rust-lint-action@v3
         with:
           rustfmt: true
           clippy: true
