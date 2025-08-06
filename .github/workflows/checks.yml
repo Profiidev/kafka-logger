@@ -48,7 +48,7 @@ jobs:
       - build_and_test
     steps:
       - name: Download Test Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: test-results-*
           merge-multiple: true
