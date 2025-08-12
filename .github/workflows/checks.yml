@@ -17,7 +17,7 @@ jobs:
       - run: choco install ninja
         if: ${{ matrix.os.name == 'windows' }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo and rust files
@@ -67,7 +67,7 @@ jobs:
       checks: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.RELEASE_PLZ_TOKEN }}
       - uses: dtolnay/rust-toolchain@stable
