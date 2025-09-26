@@ -77,6 +77,8 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLZ_TOKEN }}
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
 
       - name: Cache cargo and rust files
         id: rust_cache
