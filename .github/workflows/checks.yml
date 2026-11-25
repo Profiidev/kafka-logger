@@ -73,12 +73,17 @@ jobs:
     name: Run linters
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       checks: write
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: profiidev/gluon@d715c4a8bd804db764307ad041e73c1c60ec7382 # v0
+        id: app-token
+        if: github.event.pull_request.head.repo.full_name == github.repository
         with:
-          token: ${{ secrets.RELEASE_PLZ_TOKEN }}
+          url: https://gluon.profidev.io
+          profile: lint
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
         with:
           toolchain: stable
@@ -97,3 +102,4 @@ jobs:
           rustfmt: true
           clippy: true
           auto_fix: true
+          github_token: ${{ steps.app-token.outputs.token || github.token }}
