@@ -4,6 +4,7 @@ on:
   pull_request_target:
 
 permissions:
+  id-token: write
   contents: read
   pull-requests: write
 
@@ -12,10 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
+      - uses: profiidev/gluon@d715c4a8bd804db764307ad041e73c1c60ec7382 # v0
+        id: app-token
+        with:
+          url: https://gluon.profidev.io
+          profile: pr-automation
       - name: Checkout code
         uses: actions/checkout@v5
       - name: Enable auto-merge for PR
         run: gh pr merge ${{ github.event.pull_request.number }} --auto --squash
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}

@@ -22,8 +22,9 @@ jobs:
         if: ${{ matrix.os.name == 'windows' }}
 
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
         with:
+          toolchain: stable
           components: clippy,rustfmt
 
       - name: Cache cargo and rust files
@@ -33,7 +34,9 @@ jobs:
           cache-on-failure: true
           shared-key: "build_and_test_${{ matrix.os.name }}"
 
-      - uses: taiki-e/install-action@nextest
+      - uses: taiki-e/install-action@fe3acb53a98b62c772db35de75ce0e4595e7ca8c # v2.90.8
+        with:
+          tool: cargo-nextest
       - name: "Build and test"
         run: cargo nextest run --workspace --all-features --profile ${{ matrix.os.name }}
 
@@ -70,14 +73,20 @@ jobs:
     name: Run linters
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       checks: write
       contents: write
     steps:
+      - uses: profiidev/gluon@d715c4a8bd804db764307ad041e73c1c60ec7382 # v0
+        id: app-token
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        with:
+          url: https://gluon.profidev.io
+          profile: lint
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
         with:
-          token: ${{ secrets.RELEASE_PLZ_TOKEN }}
-      - uses: dtolnay/rust-toolchain@stable
-        with:
+          toolchain: stable
           components: clippy,rustfmt
 
       - name: Cache cargo and rust files
@@ -93,3 +102,4 @@ jobs:
           rustfmt: true
           clippy: true
           auto_fix: true
+          github_token: ${{ steps.app-token.outputs.token || github.token }}
